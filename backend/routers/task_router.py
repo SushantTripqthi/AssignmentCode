@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from dependencies import get_db
+
 from services.task_service import TaskService
 
 from schemas.task_schema import (
@@ -10,57 +11,165 @@ from schemas.task_schema import (
     TaskResponse
 )
 
+
 router = APIRouter(
     prefix="/tasks",
     tags=["Tasks"]
 )
 
 
-@router.post("/", response_model=TaskResponse, status_code=201)
-def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    return TaskService.create_task(db, task)
+# ==================================================
+# CREATE TASK
+# ==================================================
+
+@router.post(
+    "/",
+    response_model=TaskResponse,
+    status_code=201
+)
+def create_task(
+    task: TaskCreate,
+    db: Session = Depends(get_db)
+):
+
+    return TaskService.create_task(
+        db,
+        task
+    )
 
 
-@router.get("/", response_model=list[TaskResponse])
-def get_all_tasks(db: Session = Depends(get_db)):
+# ==================================================
+# GET ALL TASKS
+# ==================================================
+
+@router.get(
+    "/",
+    response_model=list[TaskResponse]
+)
+def get_all_tasks(
+    db: Session = Depends(get_db)
+):
+
     return TaskService.get_all_tasks(db)
 
 
-@router.get("/{task_id}", response_model=TaskResponse)
-def get_task(task_id: int, db: Session = Depends(get_db)):
-    return TaskService.get_task(db, task_id)
+# ==================================================
+# LINEAR SEARCH
+# ==================================================
+
+@router.get(
+    "/search",
+    response_model=list[TaskResponse]
+)
+def search_tasks(
+    title: str | None = None,
+    db: Session = Depends(get_db)
+):
+
+    if title is None:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Provide title for search."
+        )
+
+    return TaskService.search_by_title(
+        db,
+        title
+    )
 
 
-@router.put("/{task_id}", response_model=TaskResponse)
+# ==================================================
+# BINARY SEARCH
+# ==================================================
+
+@router.get(
+    "/search-by-id/{task_id}",
+    response_model=TaskResponse
+)
+def search_task_by_id(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+
+    return TaskService.search_by_id(
+        db,
+        task_id
+    )
+
+
+# ==================================================
+# INSERTION SORT
+# ==================================================
+
+@router.get(
+    "/sort",
+    response_model=list[TaskResponse]
+)
+def sort_tasks(
+    sort_by: str = "priority",
+    db: Session = Depends(get_db)
+):
+
+    return TaskService.sort_tasks(
+        db,
+        sort_by
+    )
+
+
+# ==================================================
+# GET TASK BY ID
+# ==================================================
+
+@router.get(
+    "/{task_id}",
+    response_model=TaskResponse
+)
+def get_task(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+
+    return TaskService.get_task(
+        db,
+        task_id
+    )
+
+
+# ==================================================
+# UPDATE TASK
+# ==================================================
+
+@router.put(
+    "/{task_id}",
+    response_model=TaskResponse
+)
 def update_task(
     task_id: int,
     task: TaskUpdate,
     db: Session = Depends(get_db)
 ):
-    return TaskService.update_task(db, task_id, task)
+
+    return TaskService.update_task(
+        db,
+        task_id,
+        task
+    )
 
 
-@router.delete("/{task_id}")
-def delete_task(task_id: int, db: Session = Depends(get_db)):
-    return TaskService.delete_task(db, task_id)
+# ==================================================
+# DELETE TASK
+# ==================================================
 
-@router.get("/sort")
-def sort_tasks(
-    key: str = "priority",
-    db: Session = Depends(get_db)
-):
-    return TaskService.sort_tasks(db, key)
-
-@router.get("/search/title")
-def search_title(
-    title: str,
-    db: Session = Depends(get_db)
-):
-    return TaskService.search_task_title(db, title)
-
-@router.get("/search/id")
-def search_id(
+@router.delete(
+    "/{task_id}"
+)
+def delete_task(
     task_id: int,
     db: Session = Depends(get_db)
 ):
-    return TaskService.search_task_id(db, task_id)
+
+    return TaskService.delete_task(
+        db,
+        task_id
+    )

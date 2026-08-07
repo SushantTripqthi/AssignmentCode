@@ -1,28 +1,39 @@
-from algorithms.comparison_counter import increment
+from algorithms.comparison_counter import ComparisonCounter
 
 
-def binary_search(records, key, value):
+def binary_search(records, key, value, counter=None):
+    """
+    Search a sorted list using Binary Search.
+
+    Returns:
+        Matching record
+        or None if not found
+    """
+
+    if counter is None:
+        counter = ComparisonCounter()
 
     low = 0
-
     high = len(records) - 1
+
+    target = value
 
     while low <= high:
 
         mid = (low + high) // 2
 
-        increment()
+        middle_value = getattr(records[mid], key)
 
-        current = str(getattr(records[mid], key)).lower()
+        if hasattr(middle_value, "value"):
+            middle_value = middle_value.value
 
-        target = str(value).lower()
+        counter.increment()
 
-        if current == target:
+        if middle_value == target:
             return records[mid]
 
-        elif current < target:
+        if middle_value < target:
             low = mid + 1
-
         else:
             high = mid - 1
 
