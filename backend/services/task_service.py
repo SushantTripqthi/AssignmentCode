@@ -2,23 +2,26 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from repositories.task_repository import TaskRepository
-
 from repositories.project_repository import ProjectRepository
 
-from schemas.task_schema import TaskCreate
-from schemas.task_schema import TaskUpdate
+from schemas.task_schema import TaskCreate, TaskUpdate
 
 from algorithms.insertion_sort import insertion_sort
 from algorithms.linear_search import linear_search
 from algorithms.binary_search import binary_search
 
-from algorithms.comparison_counter import ComparisonCounter
-
 
 class TaskService:
 
+    # ==================================================
+    # CREATE TASK
+    # ==================================================
+
     @staticmethod
-    def create_task(db: Session, task: TaskCreate):
+    def create_task(
+        db: Session,
+        task: TaskCreate
+    ):
 
         project = ProjectRepository.get_by_id(
             db,
@@ -31,23 +34,31 @@ class TaskService:
                 detail="Project not found."
             )
 
-        return TaskRepository.create(db, task)
+        return TaskRepository.create(
+            db,
+            task
+        )
 
-    # --------------------------------------------------
+    # ==================================================
     # GET ALL TASKS
-    # --------------------------------------------------
+    # ==================================================
 
     @staticmethod
-    def get_all_tasks(db: Session):
+    def get_all_tasks(
+        db: Session
+    ):
 
         return TaskRepository.get_all(db)
 
-    # --------------------------------------------------
+    # ==================================================
     # GET TASK BY ID
-    # --------------------------------------------------
+    # ==================================================
 
     @staticmethod
-    def get_task(db: Session, task_id: int):
+    def get_task(
+        db: Session,
+        task_id: int
+    ):
 
         task = TaskRepository.get_by_id(
             db,
@@ -62,9 +73,9 @@ class TaskService:
 
         return task
 
-    # --------------------------------------------------
+    # ==================================================
     # UPDATE TASK
-    # --------------------------------------------------
+    # ==================================================
 
     @staticmethod
     def update_task(
@@ -87,9 +98,9 @@ class TaskService:
 
         return updated_task
 
-    # --------------------------------------------------
+    # ==================================================
     # DELETE TASK
-    # --------------------------------------------------
+    # ==================================================
 
     @staticmethod
     def delete_task(
@@ -113,110 +124,164 @@ class TaskService:
         }
 
     # ==================================================
-    # ALGORITHM SECTION
+    # CONVERT TASK TO DICTIONARY
     # ==================================================
 
-    # --------------------------------------------------
-    # INSERTION SORT
-    # --------------------------------------------------
-
     @staticmethod
-    def sort_tasks(
-        db: Session,
-        sort_by: str
-    ):
+    def _task_to_dict(task):
 
-        allowed_sort_fields = {
-            "id",
-            "title",
-            "priority"
+        priority = task.priority
+
+        if hasattr(priority, "value"):
+            priority = priority.value
+
+        return {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "priority": priority,
+            "due_date": task.due_date,
+            "project_id": task.project_id
         }
 
-        if sort_by not in allowed_sort_fields:
+    # ==================================================
+    # GET TASKS WITH SORTING
+    # ==================================================
 
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    "Invalid sort field. "
-                    "Allowed values: id, title, priority"
-                )
-            )
+    @staticmethod
+    def get_tasks_with_sort(
+        db: Session,
+        sort: str | None = None
+    ):
 
         tasks = TaskRepository.get_all(db)
 
-        counter = ComparisonCounter()
+        records = [
+            TaskService._task_to_dict(task)
+            for task in tasks
+        ]
 
-        sorted_tasks = insertion_sort(
-            tasks,
-            sort_by,
-            counter
+        # ----------------------------------------------
+        # PDF requirement:
+        # /tasks?sort=priority
+        # ----------------------------------------------
+
+        if sort is None:
+            return records
+
+        if sort != "priority":
+            raise HTTPException(
+                status_code=400,
+                detail="Only sort=priority is supported."
+            )
+
+        # Custom Insertion Sort
+        insertion_sort(
+            records,
+            "priority"
         )
 
-        return sorted_tasks
+        return records
 
-    # --------------------------------------------------
-    # LINEAR SEARCH - TITLE
-    # --------------------------------------------------
+    # ==================================================
+    # SEARCH TASK
+    # ==================================================
 
     @staticmethod
-    def search_by_title(
+    def search_tasks(
         db: Session,
-        title: str
+        title: str,
+        algo: str
     ):
 
-        if not title.strip():
+        # ----------------------------------------------
+        # Validate title
+        # ----------------------------------------------
+
+        if not title or not title.strip():
 
             raise HTTPException(
                 status_code=400,
                 detail="Search title cannot be blank."
             )
 
-        tasks = TaskRepository.get_all(db)
+        # ----------------------------------------------
+        # Validate algorithm
+        # ----------------------------------------------
 
-        counter = ComparisonCounter()
+        algo = algo.lower().strip()
 
-        results = linear_search(
-            tasks,
-            "title",
-            title,
-            counter
-        )
+        if algo not in {"linear", "binary"}:
 
-        return results
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Invalid algorithm. "
+                    "Use 'linear' or 'binary'."
+                )
+            )
 
-    # --------------------------------------------------
-    # BINARY SEARCH - ID
-    # --------------------------------------------------
-
-    @staticmethod
-    def search_by_id(
-        db: Session,
-        task_id: int
-    ):
+        # ----------------------------------------------
+        # Get tasks from database
+        # ----------------------------------------------
 
         tasks = TaskRepository.get_all(db)
 
-        counter = ComparisonCounter()
+        # ----------------------------------------------
+        # Convert ORM objects to dictionaries
+        # ----------------------------------------------
 
-        # Binary Search requires sorted input.
-        sorted_tasks = insertion_sort(
-            tasks,
-            "id",
-            counter
-        )
+        records = [
+            TaskService._task_to_dict(task)
+            for task in tasks
+        ]
 
-        result = binary_search(
-            sorted_tasks,
-            "id",
-            task_id,
-            counter
-        )
+        # ==================================================
+        # LINEAR SEARCH
+        # ==================================================
 
-        if not result:
+        if algo == "linear":
+
+            index = linear_search(
+                records,
+                title,
+                "title"
+            )
+
+        # ==================================================
+        # BINARY SEARCH
+        # ==================================================
+
+        else:
+
+            # Binary Search requires sorted data.
+            # First sort by title using our custom
+            # Insertion Sort.
+
+            insertion_sort(
+                records,
+                "title"
+            )
+
+            index = binary_search(
+                records,
+                title,
+                "title"
+            )
+
+        # ----------------------------------------------
+        # Task not found
+        # ----------------------------------------------
+
+        if index == -1:
 
             raise HTTPException(
                 status_code=404,
                 detail="Task not found."
             )
 
-        return result
+        # ----------------------------------------------
+        # Return matching task
+        # ----------------------------------------------
+
+        return records[index]

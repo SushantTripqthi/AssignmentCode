@@ -1,40 +1,45 @@
-from algorithms.comparison_counter import ComparisonCounter
-
-
-def binary_search(records, key, value, counter=None):
+def binary_search(sorted_records, target_value, key):
     """
-    Search a sorted list using Binary Search.
+    Search a sorted list of dictionary records
+    using Binary Search.
+
+    Parameters:
+        sorted_records: records already sorted by key
+        target_value: value to search
+        key: dictionary key
 
     Returns:
-        Matching record
-        or None if not found
+        Matching index.
+        Returns -1 when no match is found.
     """
 
-    if counter is None:
-        counter = ComparisonCounter()
-
     low = 0
-    high = len(records) - 1
+    high = len(sorted_records) - 1
 
-    target = value
+    target = target_value
+
+    if isinstance(target, str):
+        target = target.lower().strip()
 
     while low <= high:
 
         mid = (low + high) // 2
 
-        middle_value = getattr(records[mid], key)
+        middle_value = sorted_records[mid][key]
 
-        if hasattr(middle_value, "value"):
-            middle_value = middle_value.value
-
-        counter.increment()
+        if isinstance(middle_value, str):
+            middle_value = middle_value.lower().strip()
 
         if middle_value == target:
-            return records[mid]
+
+            return mid
 
         if middle_value < target:
+
             low = mid + 1
+
         else:
+
             high = mid - 1
 
-    return None
+    return -1

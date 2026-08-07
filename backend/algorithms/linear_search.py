@@ -1,30 +1,25 @@
-from algorithms.comparison_counter import ComparisonCounter
-
-
-def linear_search(records, key, value, counter=None):
+def linear_search(records, target_value, key):
     """
     Search records sequentially using Linear Search.
 
-    Returns all matching records.
+    Returns:
+        Index of the first matching record.
+        Returns -1 when no match is found.
     """
 
-    if counter is None:
-        counter = ComparisonCounter()
+    target = target_value
 
-    results = []
+    if isinstance(target, str):
+        target = target.lower().strip()
 
-    target = str(value).strip().lower()
+    for index in range(len(records)):
 
-    for record in records:
+        value = records[index][key]
 
-        counter.increment()
+        if isinstance(value, str):
+            value = value.lower().strip()
 
-        record_value = getattr(record, key)
+        if value == target:
+            return index
 
-        if hasattr(record_value, "value"):
-            record_value = record_value.value
-
-        if str(record_value).strip().lower() == target:
-            results.append(record)
-
-    return results
+    return -1
