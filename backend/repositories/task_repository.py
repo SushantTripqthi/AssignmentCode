@@ -64,3 +64,14 @@ class TaskRepository:
             db.commit()
 
         return db_task
+    
+    @staticmethod
+    def get_all_tasks(db: Session):
+        return db.query(Task).all()
+
+    @staticmethod
+    def get_task_by_title(db: Session, title: str):
+        return db.query(Task).filter(Task.title == title).all()
+    
+    
+    

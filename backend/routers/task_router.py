@@ -43,3 +43,24 @@ def update_task(
 @router.delete("/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     return TaskService.delete_task(db, task_id)
+
+@router.get("/sort")
+def sort_tasks(
+    key: str = "priority",
+    db: Session = Depends(get_db)
+):
+    return TaskService.sort_tasks(db, key)
+
+@router.get("/search/title")
+def search_title(
+    title: str,
+    db: Session = Depends(get_db)
+):
+    return TaskService.search_task_title(db, title)
+
+@router.get("/search/id")
+def search_id(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+    return TaskService.search_task_id(db, task_id)
