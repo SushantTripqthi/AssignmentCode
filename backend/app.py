@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 
-from database import Base
-from database import engine
+from database import Base, engine
+
+# Import all models
+from models import User, Project, Task
 
 app = FastAPI(
     title="TaskFlow",
@@ -13,6 +15,4 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
-    return {
-        "message": "TaskFlow Backend Running"
-    }
+    return {"message": "TaskFlow Backend Running"}
