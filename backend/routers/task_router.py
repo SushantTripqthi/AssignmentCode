@@ -39,30 +39,47 @@ def create_task(
 
 
 # ==================================================
-# GET ALL TASKS
+# GET TASKS
+#
+# Normal:
+# GET /tasks/
+#
+# Sorted:
+# GET /tasks/?sort=priority
 # ==================================================
 
 @router.get(
     "/",
     response_model=list[TaskResponse]
 )
-def get_all_tasks(
+def get_tasks(
+    sort: str | None = None,
     db: Session = Depends(get_db)
 ):
 
-    return TaskService.get_all_tasks(db)
+    return TaskService.get_tasks_with_sort(
+        db,
+        sort
+    )
 
 
 # ==================================================
-# LINEAR SEARCH
+# SEARCH TASK
+#
+# Linear:
+# GET /tasks/search?title=Backend&algo=linear
+#
+# Binary:
+# GET /tasks/search?title=Backend&algo=binary
 # ==================================================
 
 @router.get(
     "/search",
-    response_model=list[TaskResponse]
+    response_model=TaskResponse
 )
-def search_tasks(
+def search_task(
     title: str | None = None,
+    algo: str | None = None,
     db: Session = Depends(get_db)
 ):
 
@@ -73,47 +90,20 @@ def search_tasks(
             detail="Provide title for search."
         )
 
-    return TaskService.search_by_title(
+    if algo is None:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Provide search algorithm. "
+                "Use 'linear' or 'binary'."
+            )
+        )
+
+    return TaskService.search_tasks(
         db,
-        title
-    )
-
-
-# ==================================================
-# BINARY SEARCH
-# ==================================================
-
-@router.get(
-    "/search-by-id/{task_id}",
-    response_model=TaskResponse
-)
-def search_task_by_id(
-    task_id: int,
-    db: Session = Depends(get_db)
-):
-
-    return TaskService.search_by_id(
-        db,
-        task_id
-    )
-
-
-# ==================================================
-# INSERTION SORT
-# ==================================================
-
-@router.get(
-    "/sort",
-    response_model=list[TaskResponse]
-)
-def sort_tasks(
-    sort_by: str = "priority",
-    db: Session = Depends(get_db)
-):
-
-    return TaskService.sort_tasks(
-        db,
-        sort_by
+        title,
+        algo
     )
 
 

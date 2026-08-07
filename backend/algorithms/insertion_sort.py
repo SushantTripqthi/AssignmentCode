@@ -1,63 +1,70 @@
-from algorithms.comparison_counter import ComparisonCounter
-
-
 PRIORITY_ORDER = {
-    "high": 1,
+    "low": 1,
     "medium": 2,
-    "low": 3
+    "high": 3
 }
 
 
-def get_sort_value(record, key):
-    value = getattr(record, key)
+def _get_comparable_value(record, key):
+    """
+    Return a value that can be compared during sorting.
+
+    Priority is converted to:
+        low    -> 1
+        medium -> 2
+        high   -> 3
+    """
+
+    value = record[key]
 
     if key == "priority":
-        value = value.value if hasattr(value, "value") else str(value)
-        return PRIORITY_ORDER.get(value.lower(), 999)
+        value = str(value).lower()
+        return PRIORITY_ORDER.get(value, 999)
 
-    if key == "title":
-        return str(value).lower()
+    if isinstance(value, str):
+        return value.lower()
 
     return value
 
 
-def insertion_sort(records, key, counter=None):
+def insertion_sort(records, key):
     """
-    Sort records using Insertion Sort.
+    Sort a list of dictionary records in-place
+    using the Insertion Sort algorithm.
 
     Parameters:
-        records: list of objects
-        key: object attribute used for sorting
-        counter: optional ComparisonCounter
+        records: list[dict]
+        key: dictionary key used for sorting
 
     Returns:
-        New sorted list
+        None
     """
 
-    if counter is None:
-        counter = ComparisonCounter()
+    for i in range(1, len(records)):
 
-    arr = records[:]
+        current_record = records[i]
 
-    for i in range(1, len(arr)):
-
-        current = arr[i]
-        current_value = get_sort_value(current, key)
+        current_value = _get_comparable_value(
+            current_record,
+            key
+        )
 
         j = i - 1
 
         while j >= 0:
 
-            counter.increment()
-
-            previous_value = get_sort_value(arr[j], key)
+            previous_value = _get_comparable_value(
+                records[j],
+                key
+            )
 
             if previous_value > current_value:
-                arr[j + 1] = arr[j]
+
+                records[j + 1] = records[j]
+
                 j -= 1
+
             else:
                 break
 
-        arr[j + 1] = current
-
-    return arr
+        records[j + 1] = current_record
