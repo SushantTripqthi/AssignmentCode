@@ -8,7 +8,8 @@ from services.task_service import TaskService
 from schemas.task_schema import (
     TaskCreate,
     TaskUpdate,
-    TaskResponse
+    TaskResponse,
+    QuickAddRequest
 )
 
 
@@ -39,20 +40,34 @@ def create_task(
 
 
 # ==================================================
-# GET TASKS
-#
-# Normal:
-# GET /tasks/
-#
-# Sorted:
-# GET /tasks/?sort=priority
+# QUICK ADD TASK
+# ==================================================
+
+@router.post(
+    "/quick-add",
+    response_model=TaskResponse,
+    status_code=201
+)
+def quick_add_task(
+    request: QuickAddRequest,
+    db: Session = Depends(get_db)
+):
+
+    return TaskService.quick_add_task(
+        db,
+        request
+    )
+
+
+# ==================================================
+# GET ALL TASKS / SORT
 # ==================================================
 
 @router.get(
     "/",
     response_model=list[TaskResponse]
 )
-def get_tasks(
+def get_all_tasks(
     sort: str | None = None,
     db: Session = Depends(get_db)
 ):
@@ -64,22 +79,16 @@ def get_tasks(
 
 
 # ==================================================
-# SEARCH TASK
-#
-# Linear:
-# GET /tasks/search?title=Backend&algo=linear
-#
-# Binary:
-# GET /tasks/search?title=Backend&algo=binary
+# SEARCH TASK BY TITLE
 # ==================================================
 
 @router.get(
     "/search",
     response_model=TaskResponse
 )
-def search_task(
+def search_tasks(
     title: str | None = None,
-    algo: str | None = None,
+    algo: str = "linear",
     db: Session = Depends(get_db)
 ):
 
@@ -90,20 +99,29 @@ def search_task(
             detail="Provide title for search."
         )
 
-    if algo is None:
-
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Provide search algorithm. "
-                "Use 'linear' or 'binary'."
-            )
-        )
-
     return TaskService.search_tasks(
         db,
         title,
         algo
+    )
+
+
+# ==================================================
+# BINARY SEARCH BY ID
+# ==================================================
+
+@router.get(
+    "/search-by-id/{task_id}",
+    response_model=TaskResponse
+)
+def search_task_by_id(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+
+    return TaskService.search_by_id(
+        db,
+        task_id
     )
 
 

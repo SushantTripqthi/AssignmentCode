@@ -1,70 +1,85 @@
-PRIORITY_ORDER = {
-    "low": 1,
-    "medium": 2,
-    "high": 3
-}
-
-
-def _get_comparable_value(record, key):
+def _normalize_value(value):
     """
-    Return a value that can be compared during sorting.
-
-    Priority is converted to:
-        low    -> 1
-        medium -> 2
-        high   -> 3
+    Normalize values before comparison.
     """
 
-    value = record[key]
-
-    if key == "priority":
-        value = str(value).lower()
-        return PRIORITY_ORDER.get(value, 999)
+    if hasattr(value, "value"):
+        value = value.value
 
     if isinstance(value, str):
-        return value.lower()
+        return value.lower().strip()
 
     return value
 
 
-def insertion_sort(records, key):
+def insertion_sort(
+    records,
+    key,
+    counter=None
+):
     """
-    Sort a list of dictionary records in-place
-    using the Insertion Sort algorithm.
+    Custom Insertion Sort.
+
+    Sorts records in ascending order based
+    on the supplied dictionary key.
 
     Parameters:
-        records: list[dict]
-        key: dictionary key used for sorting
+        records: list of dictionaries
+        key: dictionary field used for sorting
+        counter: optional ComparisonCounter
 
     Returns:
-        None
+        Sorted list
     """
+
+    priority_order = {
+        "low": 1,
+        "medium": 2,
+        "high": 3
+    }
 
     for i in range(1, len(records)):
 
-        current_record = records[i]
+        current = records[i]
 
-        current_value = _get_comparable_value(
-            current_record,
-            key
+        current_value = _normalize_value(
+            current[key]
         )
+
+        # Priority needs custom ordering
+        if key == "priority":
+
+            current_value = priority_order.get(
+                current_value,
+                999
+            )
 
         j = i - 1
 
         while j >= 0:
 
-            previous_value = _get_comparable_value(
-                records[j],
-                key
+            previous_value = _normalize_value(
+                records[j][key]
             )
 
-            if previous_value > current_value:
+            if key == "priority":
 
-                records[j + 1] = records[j]
+                previous_value = priority_order.get(
+                    previous_value,
+                    999
+                )
 
-                j -= 1
+            # Count comparison
+            if counter is not None:
+                counter.increment()
 
-            else:
+            if previous_value <= current_value:
                 break
 
-        records[j + 1] = current_record
+            records[j + 1] = records[j]
+
+            j -= 1
+
+        records[j + 1] = current
+
+    return records

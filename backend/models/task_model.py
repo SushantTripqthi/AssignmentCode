@@ -1,8 +1,10 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import Enum
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Enum
+)
 
 from sqlalchemy.orm import relationship
 
@@ -11,18 +13,40 @@ import enum
 from database import Base
 
 
+# ==================================================
+# PRIORITY ENUM
+# ==================================================
+
 class Priority(str, enum.Enum):
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
 
 
+# ==================================================
+# TASK MODEL
+# ==================================================
+
 class Task(Base):
+
     __tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    title = Column(String, nullable=False)
+    title = Column(
+        String(200),
+        nullable=False
+    )
+
+    description = Column(
+        String(1000),
+        nullable=True
+    )
 
     priority = Column(
         Enum(Priority),
