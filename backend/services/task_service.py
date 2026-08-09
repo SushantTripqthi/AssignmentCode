@@ -4,7 +4,13 @@ from sqlalchemy.orm import Session
 from repositories.task_repository import TaskRepository
 from repositories.project_repository import ProjectRepository
 
-from schemas.task_schema import TaskCreate, TaskUpdate
+from ai.quick_add_parser import parse_quick_add
+
+from schemas.task_schema import (
+    QuickAddRequest,
+    TaskCreate,
+    TaskUpdate
+)
 
 from algorithms.insertion_sort import insertion_sort
 from algorithms.linear_search import linear_search
@@ -38,6 +44,83 @@ class TaskService:
             db,
             task
         )
+
+    # ==================================================
+    # QUICK-ADD TASK
+    # ==================================================
+    
+@staticmethod
+def quick_add_task(
+    db: Session,
+    request: QuickAddRequest
+):
+    """
+    Create a task from a natural-language
+    Quick-Add description.
+
+    Validation happens BEFORE the repository
+    writes anything to the database.
+    """
+
+    # ==================================================
+    # 1. VALIDATE PROJECT
+    # ==================================================
+
+    project = ProjectRepository.get_by_id(
+        db,
+        request.project_id
+    )
+
+    if not project:
+
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "project_id": [
+                    "Project does not exist."
+                ]
+            }
+        )
+
+    # ==================================================
+    # 2. PARSE DESCRIPTION
+    # ==================================================
+
+    parsed = parse_quick_add(
+        request.description
+    )
+
+    # ==================================================
+    # 3. VALIDATE PARSED TASK BEFORE DB WRITE
+    # ==================================================
+
+    try:
+
+        task_data = TaskCreate(
+            title=parsed["title"],
+            description=request.description,
+            priority=parsed["priority"],
+            due_date=parsed["due_date_hint"],
+            project_id=request.project_id
+        )
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "validation_error": str(exc)
+            }
+        )
+
+    # ==================================================
+    # 4. ONLY AFTER VALIDATION → DATABASE
+    # ==================================================
+
+    return TaskRepository.create(
+        db,
+        task_data
+    )
 
     # ==================================================
     # GET ALL TASKS
@@ -161,10 +244,10 @@ class TaskService:
             for task in tasks
         ]
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # PDF requirement:
         # /tasks?sort=priority
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         if sort is None:
             return records
@@ -175,7 +258,10 @@ class TaskService:
                 detail="Only sort=priority is supported."
             )
 
+        # --------------------------------------------------
         # Custom Insertion Sort
+        # --------------------------------------------------
+
         insertion_sort(
             records,
             "priority"
@@ -194,9 +280,9 @@ class TaskService:
         algo: str
     ):
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # Validate title
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         if not title or not title.strip():
 
@@ -205,13 +291,16 @@ class TaskService:
                 detail="Search title cannot be blank."
             )
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # Validate algorithm
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         algo = algo.lower().strip()
 
-        if algo not in {"linear", "binary"}:
+        if algo not in {
+            "linear",
+            "binary"
+        }:
 
             raise HTTPException(
                 status_code=400,
@@ -221,15 +310,15 @@ class TaskService:
                 )
             )
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # Get tasks from database
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         tasks = TaskRepository.get_all(db)
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # Convert ORM objects to dictionaries
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         records = [
             TaskService._task_to_dict(task)
@@ -269,9 +358,9 @@ class TaskService:
                 "title"
             )
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # Task not found
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         if index == -1:
 
@@ -280,8 +369,8 @@ class TaskService:
                 detail="Task not found."
             )
 
-        # ----------------------------------------------
+        # --------------------------------------------------
         # Return matching task
-        # ----------------------------------------------
+        # --------------------------------------------------
 
         return records[index]

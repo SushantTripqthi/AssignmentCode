@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 from models.task_model import Priority
-
+from pydantic import BaseModel, Field
 
 class TaskCreate(BaseModel):
     title: str = Field(..., min_length=2, max_length=200)
@@ -33,3 +33,19 @@ class TaskResponse(BaseModel):
     project_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class QuickAddRequest(BaseModel):
+    """
+    Request schema for AI Quick-Add.
+    """
+
+    description: str = Field(
+        ...,
+        min_length=1,
+        description="Free-text task description"
+    )
+
+    project_id: int = Field(
+        ...,
+        description="Existing project ID"
+    )

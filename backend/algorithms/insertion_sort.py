@@ -1,70 +1,77 @@
-PRIORITY_ORDER = {
-    "low": 1,
-    "medium": 2,
-    "high": 3
-}
+from sqlalchemy.orm import Session
+
+from models.task_model import Task
+
+from schemas.task_schema import TaskCreate
+from schemas.task_schema import TaskUpdate
 
 
-def _get_comparable_value(record, key):
-    """
-    Return a value that can be compared during sorting.
+class TaskRepository:
 
-    Priority is converted to:
-        low    -> 1
-        medium -> 2
-        high   -> 3
-    """
+    @staticmethod
+    def create(db: Session, task: TaskCreate):
 
-    value = record[key]
-
-    if key == "priority":
-        value = str(value).lower()
-        return PRIORITY_ORDER.get(value, 999)
-
-    if isinstance(value, str):
-        return value.lower()
-
-    return value
-
-
-def insertion_sort(records, key):
-    """
-    Sort a list of dictionary records in-place
-    using the Insertion Sort algorithm.
-
-    Parameters:
-        records: list[dict]
-        key: dictionary key used for sorting
-
-    Returns:
-        None
-    """
-
-    for i in range(1, len(records)):
-
-        current_record = records[i]
-
-        current_value = _get_comparable_value(
-            current_record,
-            key
+        db_task = Task(
+            title=task.title,
+            priority=task.priority,
+            due_date=task.due_date,
+            project_id=task.project_id
         )
 
-        j = i - 1
+        db.add(db_task)
+        db.commit()
+        db.refresh(db_task)
 
-        while j >= 0:
+        return db_task
 
-            previous_value = _get_comparable_value(
-                records[j],
-                key
-            )
+    @staticmethod
+    def get_all(db: Session):
+        return db.query(Task).all()
 
-            if previous_value > current_value:
+    @staticmethod
+    def get_by_id(db: Session, task_id: int):
+        return db.query(Task).filter(Task.id == task_id).first()
 
-                records[j + 1] = records[j]
+    @staticmethod
+    def update(db: Session, task_id: int, task: TaskUpdate):
 
-                j -= 1
+        db_task = db.query(Task).filter(Task.id == task_id).first()
 
-            else:
-                break
+        if not db_task:
+            return None
 
-        records[j + 1] = current_record
+        if task.title is not None:
+            db_task.title = task.title
+
+        if task.priority is not None:
+            db_task.priority = task.priority
+
+        if task.due_date is not None:
+            db_task.due_date = task.due_date
+
+        db.commit()
+        db.refresh(db_task)
+
+        return db_task
+
+    @staticmethod
+    def delete(db: Session, task_id: int):
+
+        db_task = db.query(Task).filter(Task.id == task_id).first()
+
+        if db_task:
+            db.delete(db_task)
+            db.commit()
+
+        return db_task
+    
+    @staticmethod
+    def get_all_tasks(db: Session):
+        return db.query(Task).all()
+
+    @staticmethod
+    def get_task_by_title(db: Session, title: str):
+        return db.query(Task).filter(Task.title == title).all()
+    
+    
+    
