@@ -40,7 +40,7 @@ def create_task(
 
 
 # ==================================================
-# AI QUICK-ADD
+# QUICK ADD TASK
 # ==================================================
 
 @router.post(
@@ -60,7 +60,7 @@ def quick_add_task(
 
 
 # ==================================================
-# GET ALL TASKS
+# GET ALL TASKS / SORT
 # ==================================================
 
 @router.get(
@@ -68,16 +68,18 @@ def quick_add_task(
     response_model=list[TaskResponse]
 )
 def get_all_tasks(
+    sort: str | None = None,
     db: Session = Depends(get_db)
 ):
 
-    return TaskService.get_all_tasks(
-        db
+    return TaskService.get_tasks_with_sort(
+        db,
+        sort
     )
 
 
 # ==================================================
-# LINEAR / BINARY SEARCH
+# SEARCH TASK BY TITLE
 # ==================================================
 
 @router.get(
@@ -120,25 +122,6 @@ def search_task_by_id(
     return TaskService.search_by_id(
         db,
         task_id
-    )
-
-
-# ==================================================
-# INSERTION SORT
-# ==================================================
-
-@router.get(
-    "/sort",
-    response_model=list[TaskResponse]
-)
-def sort_tasks(
-    sort_by: str = "priority",
-    db: Session = Depends(get_db)
-):
-
-    return TaskService.sort_tasks(
-        db,
-        sort_by
     )
 
 

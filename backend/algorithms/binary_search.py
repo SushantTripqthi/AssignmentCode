@@ -1,16 +1,18 @@
-def binary_search(sorted_records, target_value, key):
+def binary_search(
+    sorted_records,
+    target_value,
+    key,
+    counter=None
+):
     """
-    Search a sorted list of dictionary records
-    using Binary Search.
+    Binary Search.
 
-    Parameters:
-        sorted_records: records already sorted by key
-        target_value: value to search
-        key: dictionary key
+    The input records must already be sorted
+    according to the provided key.
 
     Returns:
-        Matching index.
-        Returns -1 when no match is found.
+        Index of matching record.
+        Returns -1 if the record is not found.
     """
 
     low = 0
@@ -27,19 +29,28 @@ def binary_search(sorted_records, target_value, key):
 
         middle_value = sorted_records[mid][key]
 
+        # Handle Enum values
+        if hasattr(middle_value, "value"):
+            middle_value = middle_value.value
+
+        # Normalize strings
         if isinstance(middle_value, str):
             middle_value = middle_value.lower().strip()
 
-        if middle_value == target:
+        # Equality comparison
+        if counter is not None:
+            counter.increment()
 
+        if middle_value == target:
             return mid
 
+        # Ordering comparison
+        if counter is not None:
+            counter.increment()
+
         if middle_value < target:
-
             low = mid + 1
-
         else:
-
             high = mid - 1
 
     return -1

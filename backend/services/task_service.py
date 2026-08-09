@@ -15,6 +15,7 @@ from schemas.task_schema import (
 from algorithms.insertion_sort import insertion_sort
 from algorithms.linear_search import linear_search
 from algorithms.binary_search import binary_search
+from algorithms.comparison_counter import ComparisonCounter
 
 
 class TaskService:
@@ -35,6 +36,7 @@ class TaskService:
         )
 
         if not project:
+
             raise HTTPException(
                 status_code=404,
                 detail="Project not found."
@@ -46,84 +48,61 @@ class TaskService:
         )
 
     # ==================================================
-    # QUICK-ADD TASK
-    # ==================================================
-    
-@staticmethod
-def quick_add_task(
-    db: Session,
-    request: QuickAddRequest
-):
-    """
-    Create a task from a natural-language
-    Quick-Add description.
-
-    Validation happens BEFORE the repository
-    writes anything to the database.
-    """
-
-    # ==================================================
-    # 1. VALIDATE PROJECT
+    # QUICK ADD
     # ==================================================
 
-    project = ProjectRepository.get_by_id(
-        db,
-        request.project_id
-    )
+    @staticmethod
+    def quick_add_task(
+        db: Session,
+        request: QuickAddRequest
+    ):
 
-    if not project:
+        project = ProjectRepository.get_by_id(
+            db,
+            request.project_id
+        )
 
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "project_id": [
-                    "Project does not exist."
-                ]
-            }
+        if not project:
+
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "project_id": [
+                        "Project does not exist."
+                    ]
+                }
+            )
+
+        parsed = parse_quick_add(
+            request.description
+        )
+
+        try:
+
+            task_data = TaskCreate(
+                title=parsed["title"],
+                description=request.description,
+                priority=parsed["priority"],
+                due_date=parsed["due_date_hint"],
+                project_id=request.project_id
+            )
+
+        except Exception as exc:
+
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "validation_error": str(exc)
+                }
+            )
+
+        return TaskRepository.create(
+            db,
+            task_data
         )
 
     # ==================================================
-    # 2. PARSE DESCRIPTION
-    # ==================================================
-
-    parsed = parse_quick_add(
-        request.description
-    )
-
-    # ==================================================
-    # 3. VALIDATE PARSED TASK BEFORE DB WRITE
-    # ==================================================
-
-    try:
-
-        task_data = TaskCreate(
-            title=parsed["title"],
-            description=request.description,
-            priority=parsed["priority"],
-            due_date=parsed["due_date_hint"],
-            project_id=request.project_id
-        )
-
-    except Exception as exc:
-
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "validation_error": str(exc)
-            }
-        )
-
-    # ==================================================
-    # 4. ONLY AFTER VALIDATION → DATABASE
-    # ==================================================
-
-    return TaskRepository.create(
-        db,
-        task_data
-    )
-
-    # ==================================================
-    # GET ALL TASKS
+    # GET ALL
     # ==================================================
 
     @staticmethod
@@ -134,7 +113,7 @@ def quick_add_task(
         return TaskRepository.get_all(db)
 
     # ==================================================
-    # GET TASK BY ID
+    # GET BY ID
     # ==================================================
 
     @staticmethod
@@ -149,6 +128,7 @@ def quick_add_task(
         )
 
         if not task:
+
             raise HTTPException(
                 status_code=404,
                 detail="Task not found."
@@ -157,7 +137,7 @@ def quick_add_task(
         return task
 
     # ==================================================
-    # UPDATE TASK
+    # UPDATE
     # ==================================================
 
     @staticmethod
@@ -174,6 +154,7 @@ def quick_add_task(
         )
 
         if not updated_task:
+
             raise HTTPException(
                 status_code=404,
                 detail="Task not found."
@@ -182,7 +163,7 @@ def quick_add_task(
         return updated_task
 
     # ==================================================
-    # DELETE TASK
+    # DELETE
     # ==================================================
 
     @staticmethod
@@ -197,6 +178,7 @@ def quick_add_task(
         )
 
         if not deleted_task:
+
             raise HTTPException(
                 status_code=404,
                 detail="Task not found."
@@ -228,7 +210,7 @@ def quick_add_task(
         }
 
     # ==================================================
-    # GET TASKS WITH SORTING
+    # SORT TASKS
     # ==================================================
 
     @staticmethod
@@ -244,33 +226,28 @@ def quick_add_task(
             for task in tasks
         ]
 
-        # --------------------------------------------------
-        # PDF requirement:
-        # /tasks?sort=priority
-        # --------------------------------------------------
-
         if sort is None:
             return records
 
         if sort != "priority":
+
             raise HTTPException(
                 status_code=400,
                 detail="Only sort=priority is supported."
             )
 
-        # --------------------------------------------------
-        # Custom Insertion Sort
-        # --------------------------------------------------
+        counter = ComparisonCounter()
 
         insertion_sort(
             records,
-            "priority"
+            "priority",
+            counter
         )
 
         return records
 
     # ==================================================
-    # SEARCH TASK
+    # SEARCH BY TITLE
     # ==================================================
 
     @staticmethod
@@ -280,20 +257,12 @@ def quick_add_task(
         algo: str
     ):
 
-        # --------------------------------------------------
-        # Validate title
-        # --------------------------------------------------
-
         if not title or not title.strip():
 
             raise HTTPException(
                 status_code=400,
                 detail="Search title cannot be blank."
             )
-
-        # --------------------------------------------------
-        # Validate algorithm
-        # --------------------------------------------------
 
         algo = algo.lower().strip()
 
@@ -310,57 +279,38 @@ def quick_add_task(
                 )
             )
 
-        # --------------------------------------------------
-        # Get tasks from database
-        # --------------------------------------------------
-
         tasks = TaskRepository.get_all(db)
-
-        # --------------------------------------------------
-        # Convert ORM objects to dictionaries
-        # --------------------------------------------------
 
         records = [
             TaskService._task_to_dict(task)
             for task in tasks
         ]
 
-        # ==================================================
-        # LINEAR SEARCH
-        # ==================================================
+        counter = ComparisonCounter()
 
         if algo == "linear":
 
             index = linear_search(
                 records,
                 title,
-                "title"
+                "title",
+                counter
             )
-
-        # ==================================================
-        # BINARY SEARCH
-        # ==================================================
 
         else:
 
-            # Binary Search requires sorted data.
-            # First sort by title using our custom
-            # Insertion Sort.
-
             insertion_sort(
                 records,
-                "title"
+                "title",
+                counter
             )
 
             index = binary_search(
                 records,
                 title,
-                "title"
+                "title",
+                counter
             )
-
-        # --------------------------------------------------
-        # Task not found
-        # --------------------------------------------------
 
         if index == -1:
 
@@ -369,8 +319,45 @@ def quick_add_task(
                 detail="Task not found."
             )
 
-        # --------------------------------------------------
-        # Return matching task
-        # --------------------------------------------------
+        return records[index]
+
+    # ==================================================
+    # SEARCH BY ID - BINARY SEARCH
+    # ==================================================
+
+    @staticmethod
+    def search_by_id(
+        db: Session,
+        task_id: int
+    ):
+
+        tasks = TaskRepository.get_all(db)
+
+        records = [
+            TaskService._task_to_dict(task)
+            for task in tasks
+        ]
+
+        counter = ComparisonCounter()
+
+        insertion_sort(
+            records,
+            "id",
+            counter
+        )
+
+        index = binary_search(
+            records,
+            task_id,
+            "id",
+            counter
+        )
+
+        if index == -1:
+
+            raise HTTPException(
+                status_code=404,
+                detail="Task not found."
+            )
 
         return records[index]
