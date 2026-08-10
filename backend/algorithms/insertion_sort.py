@@ -1,16 +1,37 @@
+# ==================================================
+# PRIORITY ORDER
+# ==================================================
+
+PRIORITY_ORDER = {
+    "low": 1,
+    "medium": 2,
+    "high": 3
+}
+
+
+# ==================================================
+# NORMALIZE VALUE
+# ==================================================
+
 def _normalize_value(value):
     """
     Normalize values before comparison.
     """
 
+    # Handle Enum values
     if hasattr(value, "value"):
         value = value.value
 
+    # Handle strings
     if isinstance(value, str):
         return value.lower().strip()
 
     return value
 
+
+# ==================================================
+# INSERTION SORT
+# ==================================================
 
 def insertion_sort(
     records,
@@ -32,12 +53,6 @@ def insertion_sort(
         Sorted list
     """
 
-    priority_order = {
-        "low": 1,
-        "medium": 2,
-        "high": 3
-    }
-
     for i in range(1, len(records)):
 
         current = records[i]
@@ -46,10 +61,14 @@ def insertion_sort(
             current[key]
         )
 
-        # Priority needs custom ordering
+        # --------------------------------------------------
+        # Priority custom ordering
+        # low < medium < high
+        # --------------------------------------------------
+
         if key == "priority":
 
-            current_value = priority_order.get(
+            current_value = PRIORITY_ORDER.get(
                 current_value,
                 999
             )
@@ -64,21 +83,36 @@ def insertion_sort(
 
             if key == "priority":
 
-                previous_value = priority_order.get(
+                previous_value = PRIORITY_ORDER.get(
                     previous_value,
                     999
                 )
 
+            # --------------------------------------------------
             # Count comparison
+            # --------------------------------------------------
+
             if counter is not None:
                 counter.increment()
+
+            # --------------------------------------------------
+            # Stop if previous value is already <= current
+            # --------------------------------------------------
 
             if previous_value <= current_value:
                 break
 
+            # --------------------------------------------------
+            # Shift record
+            # --------------------------------------------------
+
             records[j + 1] = records[j]
 
             j -= 1
+
+        # --------------------------------------------------
+        # Insert current record
+        # --------------------------------------------------
 
         records[j + 1] = current
 

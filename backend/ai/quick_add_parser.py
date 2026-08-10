@@ -9,8 +9,8 @@ class QuickAddParser:
     This parser intentionally does not use any external
     LLM, API, network call, or API key.
 
-    It follows the exact parsing rules defined for
-    the TaskFlow AI Quick-Add feature.
+    It follows the parsing rules defined for the
+    TaskFlow AI Quick-Add feature.
     """
 
     # ==================================================
@@ -20,11 +20,14 @@ class QuickAddParser:
     HIGH_PRIORITY_KEYWORDS = (
         "urgent",
         "asap",
+        "high priority",
+        "high-priority",
     )
 
     LOW_PRIORITY_KEYWORDS = (
         "whenever",
         "low priority",
+        "low-priority",
     )
 
     # ==================================================
@@ -36,8 +39,7 @@ class QuickAddParser:
         "tomorrow",
         "next week",
 
-        # Two-word weekday phrases must come before
-        # the single weekday names.
+        # Two-word weekday phrases first
         "next monday",
         "next tuesday",
         "next wednesday",
@@ -46,6 +48,7 @@ class QuickAddParser:
         "next saturday",
         "next sunday",
 
+        # Single weekday names
         "monday",
         "tuesday",
         "wednesday",
@@ -68,25 +71,21 @@ class QuickAddParser:
         Parse a free-text task description.
 
         Returns:
-
-        {
-            "title": str,
-            "priority": str,
-            "due_date_hint": str | None
-        }
+            {
+                "title": str,
+                "priority": str,
+                "due_date_hint": str | None
+            }
         """
 
         if description is None:
             description = ""
 
-        # Keep the original case untouched.
+        # Keep original case for title
         original_description = description
 
-        # Lower-cased working copy is used ONLY
-        # for keyword matching.
-        working_description = (
-            original_description.lower()
-        )
+        # Lowercase copy for keyword matching
+        working_description = original_description.lower()
 
         # --------------------------------------------------
         # 1. PRIORITY
@@ -97,7 +96,7 @@ class QuickAddParser:
         )
 
         # --------------------------------------------------
-        # 2. DATE HINT
+        # 2. DATE
         # --------------------------------------------------
 
         due_date_hint = cls._parse_due_date(
@@ -122,7 +121,6 @@ class QuickAddParser:
         # --------------------------------------------------
 
         if not title.strip():
-
             title = "Untitled task"
 
         return {
@@ -143,34 +141,37 @@ class QuickAddParser:
         """
         Priority rules:
 
-        Group 1:
-            urgent / asap -> high
+        High:
+            urgent
+            asap
+            high priority
+            high-priority
 
-        Group 2:
-            whenever / low priority -> low
+        Low:
+            whenever
+            low priority
+            low-priority
 
         Otherwise:
             medium
 
-        Group 1 always wins if both groups
-        appear in the description.
+        High priority always wins if both
+        high and low keywords are present.
         """
 
-        # Group 1 has priority.
+        # High priority first
         for keyword in cls.HIGH_PRIORITY_KEYWORDS:
 
             if keyword in text:
-
                 return "high"
 
-        # Group 2.
+        # Low priority
         for keyword in cls.LOW_PRIORITY_KEYWORDS:
 
             if keyword in text:
-
                 return "low"
 
-        # Default.
+        # Default
         return "medium"
 
     # ==================================================
@@ -183,17 +184,14 @@ class QuickAddParser:
         text: str
     ) -> Optional[str]:
         """
-        Check date phrases in the exact required order.
+        Find the first matching date phrase.
 
-        The first matching phrase wins.
-
-        Returned value is always lower-case.
+        The order in DATE_PHRASES is important.
         """
 
         for phrase in cls.DATE_PHRASES:
 
             if phrase in text:
-
                 return phrase
 
         return None
@@ -210,50 +208,83 @@ class QuickAddParser:
         due_date_hint: Optional[str]
     ) -> str:
         """
-        Build the title from the original-cased description.
+        Build a clean title from the original description.
 
-        Remove:
+        Removes:
+            1. Priority keywords
+            2. Matched date phrase
 
-        1. Every occurrence of every priority keyword.
-        2. Every occurrence of the matched date phrase.
-
-        Matching is case-insensitive while the remaining
-        original text keeps its original casing.
+        Matching is case-insensitive.
+        Original title casing is preserved.
         """
 
         title = original_description
 
         # --------------------------------------------------
-        # Remove ALL priority keyword occurrences
+        # Remove priority keywords
         # --------------------------------------------------
 
         for keyword in priority_keywords:
 
             title = re.sub(
-                re.escape(keyword),
+                r"\b" + re.escape(keyword) + r"\b",
                 "",
                 title,
                 flags=re.IGNORECASE
             )
 
         # --------------------------------------------------
-        # Remove ALL occurrences of matched date phrase
+        # Remove date phrase
         # --------------------------------------------------
 
         if due_date_hint is not None:
 
             title = re.sub(
-                re.escape(due_date_hint),
+                r"\b" + re.escape(due_date_hint) + r"\b",
                 "",
                 title,
                 flags=re.IGNORECASE
             )
 
         # --------------------------------------------------
-        # Trim only leading/trailing whitespace.
+        # Clean extra spaces
         # --------------------------------------------------
 
-        return title.strip()
+        title = re.sub(
+            r"\s+",
+            " ",
+            title
+        )
+
+        # Remove spaces before punctuation
+        title = re.sub(
+            r"\s+([,.!?])",
+            r"\1",
+            title
+        )
+
+        # --------------------------------------------------
+        # Remove dangling connector words
+        # --------------------------------------------------
+
+        title = re.sub(
+            r"\b(with|and|for|on|by)\b\s*$",
+            "",
+            title,
+            flags=re.IGNORECASE
+        )
+
+        # --------------------------------------------------
+        # Final cleanup
+        # --------------------------------------------------
+
+        title = re.sub(
+            r"\s+",
+            " ",
+            title
+        ).strip()
+
+        return title
 
 
 # ======================================================
@@ -264,7 +295,7 @@ def parse_quick_add(
     description: str
 ) -> dict:
     """
-    Simple function interface for the Quick-Add feature.
+    Simple function interface for Quick-Add.
 
     Example:
 
