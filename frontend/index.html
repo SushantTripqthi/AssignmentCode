@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="TaskFlow - Task Management Dashboard"
+    >
+
+    <title>TaskFlow | Task Management</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- ==================================================
+         HEADER
+         ================================================== -->
+
+    <header class="app-header">
+
+        <div class="header-container">
+
+            <div class="brand">
+                <h1>TaskFlow</h1>
+                <p>Task Management Dashboard</p>
+            </div>
+
+            <div class="header-status">
+                <span id="connectionStatus">
+                    Backend: Connecting...
+                </span>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ==================================================
+         MAIN CONTENT
+         ================================================== -->
+
+    <main class="main-container">
+
+        <!-- ==================================================
+             PAGE INTRODUCTION
+             ================================================== -->
+
+        <section class="page-introduction">
+
+            <div>
+                <h2>Tasks</h2>
+
+                <p>
+                    Manage your tasks, priorities and due dates
+                    from one place.
+                </p>
+            </div>
+
+            <div class="task-summary">
+
+                <div class="summary-item">
+                    <span class="summary-label">
+                        Total Tasks
+                    </span>
+
+                    <strong id="totalTasks">
+                        0
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             ADD TASK SECTION
+             ================================================== -->
+
+        <section class="task-form-section">
+
+            <div class="section-heading">
+
+                <h2>Add New Task</h2>
+
+                <p>
+                    Create a task and assign it to a project.
+                </p>
+
+            </div>
+
+
+            <form id="taskForm" novalidate>
+
+                <!-- Task Title -->
+
+                <div class="form-group">
+
+                    <label for="taskTitle">
+                        Task Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskTitle"
+                        name="title"
+                        placeholder="Enter task title"
+                        minlength="2"
+                        maxlength="200"
+                        required
+                    >
+
+                    <small
+                        id="titleError"
+                        class="form-error"
+                    ></small>
+
+                </div>
+
+
+                <!-- Task Description -->
+
+                <div class="form-group">
+
+                    <label for="taskDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="taskDescription"
+                        name="description"
+                        rows="4"
+                        placeholder="Enter task description"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Priority -->
+
+                <div class="form-group">
+
+                    <label for="taskPriority">
+                        Priority
+                    </label>
+
+                    <select
+                        id="taskPriority"
+                        name="priority"
+                        required
+                    >
+
+                        <option value="low">
+                            Low
+                        </option>
+
+                        <option
+                            value="medium"
+                            selected
+                        >
+                            Medium
+                        </option>
+
+                        <option value="high">
+                            High
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Due Date -->
+
+                <div class="form-group">
+
+                    <label for="taskDueDate">
+                        Due Date
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskDueDate"
+                        name="due_date"
+                        placeholder="e.g. tomorrow or 2026-08-15"
+                    >
+
+                </div>
+
+
+                <!-- Project -->
+
+                <div class="form-group">
+
+                    <label for="taskProject">
+                        Project ID
+                    </label>
+
+                    <input
+                        type="number"
+                        id="taskProject"
+                        name="project_id"
+                        placeholder="Enter project ID"
+                        min="1"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Form Actions -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        id="submitTaskButton"
+                    >
+                        Add Task
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cancelEditButton"
+                        hidden
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <!-- Form Message -->
+
+            <div
+                id="formMessage"
+                class="form-message"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+        </section>
+
+
+        <!-- ==================================================
+             TASK CONTROLS
+             ================================================== -->
+
+        <section class="task-controls-section">
+
+            <div class="section-heading">
+
+                <h2>Task List</h2>
+
+                <p>
+                    Search, sort and manage your tasks.
+                </p>
+
+            </div>
+
+
+            <div class="task-controls">
+
+                <!-- Search -->
+
+                <div class="control-group">
+
+                    <label for="searchInput">
+                        Search Task
+                    </label>
+
+                    <input
+                        type="search"
+                        id="searchInput"
+                        placeholder="Search by title"
+                    >
+
+                </div>
+
+
+                <!-- Search Algorithm -->
+
+                <div class="control-group">
+
+                    <label for="searchAlgorithm">
+                        Search Algorithm
+                    </label>
+
+                    <select id="searchAlgorithm">
+
+                        <option value="linear">
+                            Linear Search
+                        </option>
+
+                        <option value="binary">
+                            Binary Search
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Sort -->
+
+                <div class="control-group">
+
+                    <label for="sortSelect">
+                        Sort
+                    </label>
+
+                    <select id="sortSelect">
+
+                        <option value="">
+                            Default
+                        </option>
+
+                        <option value="priority">
+                            Priority
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Search Button -->
+
+                <div class="control-group control-button">
+
+                    <button
+                        type="button"
+                        id="searchButton"
+                    >
+                        Search
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             QUICK ADD
+             ================================================== -->
+
+        <section class="quick-add-section">
+
+            <div class="section-heading">
+
+                <h2>Quick Add</h2>
+
+                <p>
+                    Describe a task naturally and let TaskFlow
+                    extract the title, priority and due date.
+                </p>
+
+            </div>
+
+
+            <form id="quickAddForm">
+
+                <div class="quick-add-row">
+
+                    <div class="form-group">
+
+                        <label for="quickAddDescription">
+                            Task Description
+                        </label>
+
+                        <input
+                            type="text"
+                            id="quickAddDescription"
+                            name="description"
+                            placeholder="e.g. Complete backend testing tomorrow with high priority"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="quickAddProject">
+                            Project ID
+                        </label>
+
+                        <input
+                            type="number"
+                            id="quickAddProject"
+                            name="project_id"
+                            min="1"
+                            placeholder="Project ID"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="quick-add-action">
+
+                        <button
+                            type="submit"
+                            id="quickAddButton"
+                        >
+                            Quick Add
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+
+            <div
+                id="quickAddMessage"
+                class="form-message"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+        </section>
+
+
+        <!-- ==================================================
+             TASK LIST
+             ================================================== -->
+
+        <section class="tasks-section">
+
+            <div class="tasks-header">
+
+                <div>
+
+                    <h2>All Tasks</h2>
+
+                    <p id="taskListStatus">
+                        Loading tasks...
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="refreshTasksButton"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+
+            <!-- Task list will be generated dynamically
+                 using JavaScript createElement() -->
+
+            <div
+                id="taskList"
+                class="task-list"
+            ></div>
+
+
+            <!-- Empty state -->
+
+            <div
+                id="emptyState"
+                class="empty-state"
+                hidden
+            >
+
+                <h3>No tasks found</h3>
+
+                <p>
+                    Create your first task to get started.
+                </p>
+
+            </div>
+
+
+            <!-- Loading state -->
+
+            <div
+                id="loadingState"
+                class="loading-state"
+                hidden
+            >
+
+                <p>Loading tasks...</p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             APPLICATION MESSAGE
+             ================================================== -->
+
+        <div
+            id="applicationMessage"
+            class="application-message"
+            role="alert"
+            aria-live="assertive"
+        ></div>
+
+    </main>
+
+
+    <!-- ==================================================
+         FOOTER
+         ================================================== -->
+
+    <footer class="app-footer">
+
+        <p>
+            TaskFlow Task Management System
+        </p>
+
+    </footer>
+
+
+    <!-- ==================================================
+         JAVASCRIPT
+         ================================================== -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
