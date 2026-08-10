@@ -178,8 +178,8 @@ Example request:
 
 ```json
 {
-  "name": "Sani",
-  "email": "sani@example.com"
+  "name": "SushantMani",
+  "email": "tripathi@example.com"
 }
 ```
 
@@ -188,8 +188,8 @@ Example response:
 ```json
 {
   "id": 1,
-  "name": "Sani",
-  "email": "sani@example.com"
+  "name": "SushantMani",
+  "email": "tripathi@example.com"
 }
 ```
 
