@@ -1,141 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="TaskFlow Task Management Dashboard">
-<title>TaskFlow | Dashboard</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow task and project management dashboard">
+  <title>TaskFlow | Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="app">
-<aside class="sidebar" id="sidebar">
-  <div class="brand"><div class="brand-logo">✓</div><div><h1>TaskFlow</h1><small>Task Management</small></div></div>
-  <nav>
-    <button class="nav active" data-page="dashboard">⌂ <span>Dashboard</span></button>
-    <button class="nav" data-page="projects">▣ <span>Projects</span></button>
-    <button class="nav" data-page="tasks">☷ <span>Tasks</span></button>
-    <button class="nav" data-page="users">♙ <span>Users</span></button>
-    <button class="nav" data-page="quick">✦ <span>AI Quick Add</span></button>
-    <button class="nav" data-page="stats">▥ <span>Statistics</span></button>
-    <button class="nav" data-page="about">ⓘ <span>About</span></button>
-  </nav>
-  <div class="side-footer"><span id="sideDot"></span><span id="sideStatus">Backend connecting</span><small>TaskFlow Management System</small></div>
-</aside>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-mark">TF</div><div><h1>TaskFlow</h1><p>Task Management</p></div></div>
+    <nav class="main-nav">
+      <button class="nav-item active" data-page="dashboard">Dashboard</button>
+      <button class="nav-item" data-page="tasks">Tasks</button>
+      <button class="nav-item" data-page="projects">Projects</button>
+      <button class="nav-item" data-page="users">Users</button>
+      <button class="nav-item" data-page="quick-add">AI Quick Add</button>
+      <button class="nav-item" data-page="statistics">Statistics</button>
+      <button class="nav-item" data-page="about">About</button>
+    </nav>
+    <div class="sidebar-status"><span class="status-dot" id="sideDot"></span><div><strong id="sideStatus">Backend connecting</strong><span>TaskFlow Management System</span></div></div>
+  </aside>
 
-<div class="main">
-<header class="topbar">
-  <button class="hamburger" id="menuBtn">☰</button>
-  <div><strong id="pageTitle">Dashboard</strong><small id="pageSub">Overview of tasks and projects</small></div>
-  <div class="welcome"><b>●</b><span>Welcome, User<small id="connection">Backend: Connecting...</small></span></div>
-</header>
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-button" id="menuButton">Menu</button>
+        <div><h2 id="pageTitle">Dashboard</h2><p id="pageSubtitle">Overview of tasks, projects and users</p></div>
+      </div>
+      <div class="topbar-status"><span class="status-dot" id="topDot"></span><div><strong>Welcome</strong><span id="connectionStatus">Backend: Connecting...</span></div></div>
+    </header>
 
-<main class="content">
+    <main class="content">
+      <section class="page active" id="dashboard" data-title="Dashboard" data-subtitle="Overview of tasks, projects and users">
+        <div class="page-header"><div><span class="eyebrow">Workspace</span><h1>Task Dashboard</h1><p>Manage tasks, projects and users from one place.</p></div>
+          <div class="page-actions"><button class="button primary" id="dashboardAddTask">Add Task</button><button class="button secondary" id="dashboardAddProject">Add Project</button></div>
+        </div>
+        <div class="stat-grid">
+          <article class="stat-card blue"><span>Total Tasks</span><strong id="totalTasks">0</strong></article>
+          <article class="stat-card green"><span>Low Priority</span><strong id="lowTasks">0</strong></article>
+          <article class="stat-card amber"><span>Medium Priority</span><strong id="mediumTasks">0</strong></article>
+          <article class="stat-card red"><span>High Priority</span><strong id="highTasks">0</strong></article>
+        </div>
 
-<section class="page active" id="dashboard">
-  <div class="page-head">
-    <div><h2>Dashboard</h2><p>Manage your work from one place.</p></div>
-    <div class="head-actions">
-      <label>Select Project<select id="projectFilter"><option value="">All Projects</option></select></label>
-      <button class="btn primary" id="addProjectTop">＋ Add Project</button>
-    </div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-header"><span class="panel-kicker">Task Management</span><h2 id="taskFormHeading">Add New Task</h2><p>Create a task and assign it to a project.</p></div>
+            <form id="taskForm" novalidate>
+              <div class="form-grid">
+                <div class="field full-width"><label for="taskTitle">Task Title</label><input id="taskTitle" minlength="2" maxlength="200" required placeholder="Enter task title"><small class="field-error" id="titleError"></small></div>
+                <div class="field full-width"><label for="taskDescription">Description</label><textarea id="taskDescription" rows="4" placeholder="Enter task description"></textarea></div>
+                <div class="field"><label for="taskPriority">Priority</label><select id="taskPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+                <div class="field"><label for="taskDueDate">Due Date</label><input id="taskDueDate" placeholder="e.g. 2026-08-15"></div>
+                <div class="field full-width"><label for="taskProject">Project</label><select id="taskProject" required><option value="">Select project</option></select></div>
+              </div>
+              <div class="form-actions"><button class="button primary" id="taskSubmit">Add Task</button><button class="button secondary" id="cancelEdit" type="button" hidden>Cancel</button></div>
+              <p class="form-message" id="taskMessage"></p>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header"><span class="panel-kicker">AI Assisted</span><h2>Quick Add</h2><p>Describe a task naturally.</p></div>
+            <form id="dashboardQuickForm">
+              <div class="field"><label for="dashboardQuickText">Task Description</label><textarea id="dashboardQuickText" rows="7" required placeholder="Example: Finish the report tomorrow, urgent"></textarea></div>
+              <div class="field"><label for="dashboardQuickProject">Project</label><select id="dashboardQuickProject" required><option value="">Select project</option></select></div>
+              <button class="button success full-width-button">Create Task</button><p class="form-message" id="dashboardQuickMessage"></p>
+            </form>
+          </section>
+        </div>
+
+        <section class="panel task-panel">
+          <div class="panel-header panel-header-row"><div><span class="panel-kicker">Live Backend Data</span><h2>Task List</h2><p id="taskStatus">Loading tasks...</p></div><button class="button secondary" id="refreshTasks">Refresh</button></div>
+          <div class="filter-bar">
+            <div class="field search-field"><label for="searchInput">Search Task</label><input id="searchInput" type="search" placeholder="Search by exact title"></div>
+            <fieldset class="algorithm-field"><legend>Search Algorithm</legend><label><input type="radio" name="searchAlgorithm" value="binary" checked> Binary Search</label><label><input type="radio" name="searchAlgorithm" value="linear"> Linear Search</label></fieldset>
+            <div class="field"><label for="sortSelect">Sort By</label><select id="sortSelect"><option value="">Default</option><option value="priority">Priority</option></select></div>
+            <button class="button primary filter-button" id="applyFilters">Apply</button>
+          </div>
+          <div class="table-container"><table><thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Priority</th><th>Due Date</th><th>Project</th><th>Actions</th></tr></thead><tbody id="taskTableBody"></tbody></table></div>
+          <div class="empty-state" id="emptyTaskState" hidden><h3>No tasks found</h3><p>Create a task or change the current search/filter.</p></div>
+        </section>
+      </section>
+
+      <section class="page" id="tasks" data-title="Tasks" data-subtitle="View, search and manage task records">
+        <div class="page-header"><div><span class="eyebrow">Task Records</span><h1>Tasks</h1><p>All task records returned by the FastAPI backend.</p></div><button class="button primary" id="tasksAddTask">Add Task</button></div>
+        <section class="panel task-panel"><div class="panel-header panel-header-row"><div><h2>All Tasks</h2><p id="allTaskStatus">Loading tasks...</p></div><button class="button secondary" id="refreshAllTasks">Refresh</button></div>
+          <div class="table-container"><table><thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Priority</th><th>Due Date</th><th>Project</th><th>Actions</th></tr></thead><tbody id="allTaskTableBody"></tbody></table></div>
+          <div class="empty-state" id="allTaskEmpty" hidden><h3>No tasks found</h3><p>The backend returned no task records.</p></div>
+        </section>
+      </section>
+
+      <section class="page" id="projects" data-title="Projects" data-subtitle="Create, view and manage projects">
+        <div class="page-header"><div><span class="eyebrow">Project Management</span><h1>Projects</h1><p>Create projects and assign them to existing users.</p></div><button class="button primary" id="projectsAddProject">Add Project</button></div>
+        <section class="panel"><div class="panel-header panel-header-row"><div><h2>Project List</h2><p id="projectStatus">Loading projects...</p></div><button class="button secondary" id="refreshProjects">Refresh</button></div>
+          <div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Owner</th><th>Actions</th></tr></thead><tbody id="projectTableBody"></tbody></table></div>
+          <div class="empty-state" id="emptyProjectState" hidden><h3>No projects found</h3><p>Create a project to start organizing tasks.</p></div>
+        </section>
+      </section>
+
+      <section class="page" id="users" data-title="Users" data-subtitle="Create and view TaskFlow users">
+        <div class="page-header"><div><span class="eyebrow">User Management</span><h1>Users</h1><p>Manage users that can own projects.</p></div><button class="button primary" id="usersAddUser">Add User</button></div>
+        <section class="panel"><div class="panel-header panel-header-row"><div><h2>User List</h2><p id="userStatus">Loading users...</p></div><button class="button secondary" id="refreshUsers">Refresh</button></div>
+          <div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table></div>
+          <div class="empty-state" id="emptyUserState" hidden><h3>No users found</h3><p>Create a user to use as a project owner.</p></div>
+        </section>
+      </section>
+
+      <section class="page" id="quick-add" data-title="AI Quick Add" data-subtitle="Create tasks using natural language">
+        <div class="page-header"><div><span class="eyebrow">AI Assisted</span><h1>Quick Add</h1><p>Create tasks using the backend parser.</p></div></div>
+        <section class="panel narrow-panel"><form id="quickPageForm"><div class="field"><label for="quickPageText">Task Description</label><textarea id="quickPageText" rows="8" required placeholder="Example: Finish the report next Friday, urgent"></textarea></div><div class="field"><label for="quickPageProject">Project</label><select id="quickPageProject" required><option value="">Select project</option></select></div><button class="button success">Create Task</button><p class="form-message" id="quickPageMessage"></p></form></section>
+      </section>
+
+      <section class="page" id="statistics" data-title="Statistics" data-subtitle="Current task distribution from backend data">
+        <div class="page-header"><div><span class="eyebrow">Reporting</span><h1>Statistics</h1><p>Current counts from task records.</p></div></div>
+        <div class="stat-grid large-stats"><article class="stat-card blue"><span>Total Tasks</span><strong id="statTotal">0</strong></article><article class="stat-card green"><span>Low Priority</span><strong id="statLow">0</strong></article><article class="stat-card amber"><span>Medium Priority</span><strong id="statMedium">0</strong></article><article class="stat-card red"><span>High Priority</span><strong id="statHigh">0</strong></article></div>
+      </section>
+
+      <section class="page" id="about" data-title="About" data-subtitle="TaskFlow project information">
+        <div class="page-header"><div><span class="eyebrow">Project</span><h1>About TaskFlow</h1><p>Full-stack task and project management application.</p></div></div>
+        <section class="panel about-panel"><h2>TaskFlow</h2><p>FastAPI + SQLAlchemy backend with HTML, CSS and JavaScript frontend.</p><div class="about-grid"><div><strong>Frontend</strong><span>HTML, CSS, JavaScript</span></div><div><strong>Backend</strong><span>FastAPI</span></div><div><strong>Database</strong><span>SQLite / SQLAlchemy</span></div><div><strong>Algorithms</strong><span>Insertion Sort, Binary Search, Linear Search</span></div><div><strong>AI Quick Add</strong><span>Keyless deterministic parser</span></div><div><strong>Integration</strong><span>Fetch API</span></div></div></section>
+      </section>
+    </main>
+    <footer class="footer">TaskFlow Task Management System</footer>
   </div>
-
-  <div class="stats">
-    <div class="stat blue"><i>☷</i><span>Total Tasks<b id="total">0</b></span></div>
-    <div class="stat green"><i>✓</i><span>Low Priority<b id="low">0</b></span></div>
-    <div class="stat orange"><i>!</i><span>Medium Priority<b id="medium">0</b></span></div>
-    <div class="stat red"><i>↑</i><span>High Priority<b id="high">0</b></span></div>
-  </div>
-
-  <div class="cards">
-    <section class="panel">
-      <div class="panel-title"><h3>▣ Add New Task</h3><p>Create a task and assign it to a project.</p></div>
-      <form id="taskForm" class="grid">
-        <label class="full">Title<input id="taskTitle" minlength="2" maxlength="200" required placeholder="Enter task title"><small id="titleError"></small></label>
-        <label class="full">Description<textarea id="taskDescription" rows="3" placeholder="Enter description"></textarea></label>
-        <label>Priority<select id="taskPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label>
-        <label>Due Date<input id="taskDue" placeholder="e.g. tomorrow or 2026-08-15"></label>
-        <label class="full">Project<select id="taskProject" required><option value="">Select project</option></select></label>
-        <div class="full actions"><button class="btn primary full" id="taskSubmit">＋ Add Task</button><button class="btn secondary" type="button" id="cancelEdit" hidden>Cancel</button></div>
-      </form>
-      <div id="taskMsg" class="msg"></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-title"><h3 class="green-text">✦ AI Quick Add</h3><p>Describe a task naturally.</p></div>
-      <form id="quickForm">
-        <label>Describe your task<textarea id="quickText" rows="6" required placeholder="Example: Complete backend testing tomorrow with high priority"></textarea></label>
-        <label>Project<select id="quickProject" required><option value="">Select project</option></select></label>
-        <button class="btn success full">✦ Create Task</button>
-      </form>
-      <div class="hint">TaskFlow sends your description to the existing Quick Add backend endpoint.</div>
-      <div id="quickMsg" class="msg"></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-title"><h3 class="purple-text">◔ Workspace Summary</h3><p>Current backend data</p></div>
-      <div class="summary"><div>Projects<b id="projectCount">0</b></div><div>Users<b id="userCount">0</b></div><div>High Priority<b id="sumHigh">0</b></div><div>Medium Priority<b id="sumMedium">0</b></div><div>Low Priority<b id="sumLow">0</b></div></div>
-    </section>
-  </div>
-
-  <section class="panel table-panel">
-    <div class="table-head"><div><h3>Task List</h3><p id="taskStatus">Loading tasks...</p></div><button class="btn secondary" id="refreshTasks">↻ Refresh</button></div>
-    <div class="controls">
-      <label>Search Task<input id="search" type="search" placeholder="Search by title..."></label>
-      <div><label>Search Algorithm</label><div class="radios"><label><input type="radio" name="algo" value="binary" checked> Binary</label><label><input type="radio" name="algo" value="linear"> Linear</label></div></div>
-      <label>Sort By<select id="sort"><option value="">Default</option><option value="priority">Priority</option><option value="title">Title</option><option value="due_date">Due Date</option></select></label>
-      <label>Order<select id="order"><option value="asc">Ascending</option><option value="desc">Descending</option></select></label>
-      <button class="btn primary" id="apply">Apply</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Priority</th><th>Due Date</th><th>Project</th><th>Actions</th></tr></thead><tbody id="taskBody"></tbody></table></div>
-    <div id="emptyTasks" class="empty" hidden><h3>No tasks found</h3><p>Create a task or change your filters.</p></div>
-  </section>
-</section>
-
-<section class="page" id="projects">
-  <div class="page-head"><div><h2>Projects</h2><p>Create and manage projects.</p></div><button class="btn primary" id="addProject">＋ Add Project</button></div>
-  <section class="panel"><div class="table-head"><div><h3>Project List</h3><p id="projectStatus">Loading projects...</p></div><button class="btn secondary" id="refreshProjects">↻ Refresh</button></div>
-  <div class="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Owner</th><th>Actions</th></tr></thead><tbody id="projectBody"></tbody></table></div></section>
-</section>
-
-<section class="page" id="tasks">
-  <div class="page-head"><div><h2>Tasks</h2><p>View and manage all tasks.</p></div><button class="btn primary" id="goAddTask">＋ Add Task</button></div>
-  <section class="panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Priority</th><th>Due Date</th><th>Project</th><th>Actions</th></tr></thead><tbody id="allTaskBody"></tbody></table></div></section>
-</section>
-
-<section class="page" id="users">
-  <div class="page-head"><div><h2>Users</h2><p>Manage users and project owners.</p></div><button class="btn primary" id="addUser">＋ Add User</button></div>
-  <section class="panel"><div class="table-head"><div><h3>User List</h3><p id="userStatus">Loading users...</p></div><button class="btn secondary" id="refreshUsers">↻ Refresh</button></div>
-  <div class="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead><tbody id="userBody"></tbody></table></div></section>
-</section>
-
-<section class="page" id="quick">
-  <div class="page-head"><div><h2>AI Quick Add</h2><p>Create tasks using natural language.</p></div></div>
-  <section class="panel standalone"><form id="quickPageForm">
-    <label>Description<textarea id="quickPageText" rows="7" required placeholder="Example: Complete backend testing tomorrow with high priority"></textarea></label>
-    <label>Project<select id="quickPageProject" required><option value="">Select project</option></select></label>
-    <button class="btn success">✦ Create Task</button>
-  </form><div id="quickPageMsg" class="msg"></div></section>
-</section>
-
-<section class="page" id="stats">
-  <div class="page-head"><div><h2>Statistics</h2><p>Live statistics from backend task data.</p></div></div>
-  <div class="stats large"><div class="stat blue"><i>☷</i><span>Total Tasks<b id="bigTotal">0</b></span></div><div class="stat green"><i>✓</i><span>Low Priority<b id="bigLow">0</b></span></div><div class="stat orange"><i>!</i><span>Medium Priority<b id="bigMedium">0</b></span></div><div class="stat red"><i>↑</i><span>High Priority<b id="bigHigh">0</b></span></div></div>
-</section>
-
-<section class="page" id="about">
-  <div class="page-head"><div><h2>About TaskFlow</h2><p>Task management application.</p></div></div>
-  <section class="panel about"><h3>TaskFlow</h3><p>TaskFlow combines task, project and user management with algorithm-based search and sorting.</p><div class="about-grid"><div><b>Frontend</b><span>HTML, CSS, JavaScript</span></div><div><b>Backend</b><span>FastAPI</span></div><div><b>Database</b><span>SQLite</span></div><div><b>Algorithms</b><span>Insertion Sort, Binary Search, Linear Search</span></div></div></section>
-</section>
-
-</main>
-<footer>TaskFlow Task Management System</footer>
-</div>
 </div>
 
-<div class="modal-bg" id="modalBg" hidden><div class="modal"><div class="modal-head"><div><h3 id="modalTitle">Add</h3><p id="modalSub">Enter information.</p></div><button id="modalClose" type="button">×</button></div><form id="modalForm"><div id="modalFields"></div><div id="modalMsg" class="msg"></div><div class="modal-actions"><button class="btn secondary" type="button" id="modalCancel">Cancel</button><button class="btn primary" id="modalSave">Save</button></div></form></div></div>
-<div id="toast" class="toast"></div>
+<div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal" role="dialog" aria-modal="true"><div class="modal-header"><div><span class="eyebrow">Management</span><h2 id="modalTitle">Add</h2><p id="modalSubtitle">Enter information.</p></div><button class="modal-close" id="modalClose">Close</button></div><form id="modalForm"><div id="modalFields" class="modal-fields"></div><p class="form-message" id="modalMessage"></p><div class="modal-actions"><button class="button secondary" id="modalCancel" type="button">Cancel</button><button class="button primary" id="modalSave">Save</button></div></form></section></div>
+<div class="toast" id="toast"></div>
 <script src="script.js"></script>
 </body>
 </html>
