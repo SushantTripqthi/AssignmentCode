@@ -44,31 +44,58 @@ TaskFlow is a full-stack task and project management application built with Fast
 ## Repository Structure
 
 ```text
-taskflow/
+TaskFlow/
+│
 ├── backend/
+│   │
+│   ├── app.py
+│   ├── database.py
+│   ├── requirements.txt
+│   ├── benchmark.py
+│   ├── check_algorithms.py
+│   │
 │   ├── algorithms/
+│   │   ├── __init__.py
 │   │   ├── insertion_sort.py
 │   │   ├── binary_search.py
 │   │   ├── linear_search.py
-│   │   ├── comparison_algorithms.py
-│   │   └── comparison_counter.py
+│   │   ├── comparison_counter.py
+│   │   └── comparison_algorithms.py
+│   │
 │   ├── ai/
 │   │   └── quick_add_parser.py
+│   │
 │   ├── models/
-│   ├── repositories/
+│   │   ├── user_model.py
+│   │   ├── project_model.py
+│   │   └── task_model.py
+│   │
 │   ├── schemas/
+│   │   ├── user_schema.py
+│   │   ├── project_schema.py
+│   │   └── task_schema.py
+│   │
+│   ├── repositories/
+│   │   ├── user_repository.py
+│   │   ├── project_repository.py
+│   │   └── task_repository.py
+│   │
 │   ├── services/
-│   ├── routers/
-│   ├── app.py
-│   ├── database.py
-│   ├── check_algorithms.py
-│   ├── benchmark.py
-│   ├── results.txt
-│   └── requirements.txt
-└── frontend/
-    ├── index.html
-    ├── styles.css
-    └── script.js
+│   │   ├── user_service.py
+│   │   ├── project_service.py
+│   │   └── task_service.py
+│   │
+│   └── routers/
+│       ├── user_router.py
+│       ├── project_router.py
+│       └── task_router.py
+│
+├── frontend/
+│   ├── index.html
+│   ├── styles.css
+│   └── script.js
+│
+└── README.md
 ```
 
 ## Data Model
