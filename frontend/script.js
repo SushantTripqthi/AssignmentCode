@@ -1,25 +1,16 @@
 'use strict';
 
-/* =========================================================
-   TaskFlow Frontend
-   HTML + CSS + JavaScript
-   Backend: FastAPI
-   ========================================================= */
+//  APIs 
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
-
 const TASKS_ENDPOINT = `${API_BASE_URL}/tasks/`;
 const PROJECTS_ENDPOINT = `${API_BASE_URL}/projects/`;
 const USERS_ENDPOINT = `${API_BASE_URL}/users/`;
 const QUICK_ADD_ENDPOINT = `${API_BASE_URL}/tasks/quick-add`;
 const SEARCH_ENDPOINT = `${API_BASE_URL}/tasks/search`;
-
 const TASK_CACHE_KEY = 'taskflow_tasks';
 
-
-/* =========================================================
-   APPLICATION STATE
-   ========================================================= */
+//    APPLICATION STATE
 
 const state = {
     tasks: [],
@@ -29,17 +20,11 @@ const state = {
     modalMode: null
 };
 
-
-/* =========================================================
-   HELPER
-   ========================================================= */
+//    HELPER
 
 const $ = (id) => document.getElementById(id);
 
-
-/* =========================================================
-   DOM ELEMENTS
-   ========================================================= */
+//    DOM ELEMENTS
 
 const dom = {
     sidebar: $('sidebar'),
@@ -98,7 +83,7 @@ const dom = {
     userStatus: $('userStatus'),
     emptyUserState: $('emptyUserState'),
 
-    /* Dashboard statistics */
+    // Dashboard statistics 
 
     totalTasks: $('totalTasks'),
     lowTasks: $('lowTasks'),
@@ -125,14 +110,10 @@ const dom = {
     modalSave: $('modalSave'),
     modalClose: $('modalClose'),
     modalCancel: $('modalCancel'),
-
     toast: $('toast')
 };
 
-
-/* =========================================================
-   INITIALIZATION
-   ========================================================= */
+//    INITIALIZATION
 
 document.addEventListener(
     'DOMContentLoaded',
@@ -141,15 +122,10 @@ document.addEventListener(
 
 
 async function initializeApplication() {
-
     registerEventListeners();
-
     loadCachedTasks();
-
     renderTasks(state.tasks);
-
     updateStatistics();
-
     await Promise.all([
         loadTasks(),
         loadProjects(),
@@ -157,19 +133,13 @@ async function initializeApplication() {
     ]);
 }
 
-
-/* =========================================================
-   EVENT LISTENERS
-   ========================================================= */
+//    EVENT LISTENER
 
 function registerEventListeners() {
-
     dom.menuButton.addEventListener(
         'click',
         toggleSidebar
     );
-
-
     document
         .querySelectorAll('.nav-item')
         .forEach((button) => {
@@ -181,72 +151,60 @@ function registerEventListeners() {
 
         });
 
-
     $('dashboardAddTask').addEventListener(
         'click',
         focusTaskForm
     );
-
 
     $('tasksAddTask').addEventListener(
         'click',
         focusTaskForm
     );
 
-
     $('dashboardAddProject').addEventListener(
         'click',
         () => openProjectModal()
     );
-
 
     $('projectsAddProject').addEventListener(
         'click',
         () => openProjectModal()
     );
 
-
     $('usersAddUser').addEventListener(
         'click',
         () => openUserModal()
     );
-
 
     dom.taskForm.addEventListener(
         'submit',
         handleTaskSubmit
     );
 
-
     dom.cancelEdit.addEventListener(
         'click',
         cancelEdit
     );
-
 
     dom.taskTitle.addEventListener(
         'input',
         validateTitleLive
     );
 
-
     dom.refreshTasks.addEventListener(
         'click',
         loadTasks
     );
-
 
     dom.refreshAllTasks.addEventListener(
         'click',
         loadTasks
     );
 
-
     dom.applyFilters.addEventListener(
         'click',
         applyTaskFilters
     );
-
 
     dom.searchInput.addEventListener(
         'keydown',
@@ -262,7 +220,6 @@ function registerEventListeners() {
         }
     );
 
-
     dom.dashboardQuickForm.addEventListener(
         'submit',
         (event) => {
@@ -276,7 +233,6 @@ function registerEventListeners() {
 
         }
     );
-
 
     dom.quickPageForm.addEventListener(
         'submit',
@@ -292,30 +248,25 @@ function registerEventListeners() {
         }
     );
 
-
     $('refreshProjects').addEventListener(
         'click',
         loadProjects
     );
-
 
     $('refreshUsers').addEventListener(
         'click',
         loadUsers
     );
 
-
     dom.modalForm.addEventListener(
         'submit',
         saveModal
     );
 
-
     dom.modalClose.addEventListener(
         'click',
         closeModal
     );
-
 
     dom.modalCancel.addEventListener(
         'click',
@@ -335,16 +286,12 @@ function registerEventListeners() {
     );
 }
 
-
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
+//    SIDEBAR
 
 function toggleSidebar() {
 
     dom.sidebar.classList.toggle('open');
 }
-
 
 /* =========================================================
    PAGE NAVIGATION
@@ -382,7 +329,6 @@ function showPage(pageId) {
         return;
     }
 
-
     page.classList.add('active');
 
     navButton.classList.add('active');
@@ -398,7 +344,6 @@ function showPage(pageId) {
 
     dom.sidebar.classList.remove('open');
 }
-
 
 /* =========================================================
    FOCUS TASK FORM
@@ -419,7 +364,6 @@ function focusTaskForm() {
         250
     );
 }
-
 
 /* =========================================================
    LOAD TASKS
@@ -606,7 +550,6 @@ async function loadUsers() {
     }
 }
 
-
 /* =========================================================
    CACHE
    ========================================================= */
@@ -649,7 +592,6 @@ function loadCachedTasks() {
     }
 }
 
-
 function saveCachedTasks() {
 
     try {
@@ -668,7 +610,6 @@ function saveCachedTasks() {
         );
     }
 }
-
 
 /* =========================================================
    RENDER TASKS
@@ -695,7 +636,6 @@ function renderTasks(taskRecords) {
     dom.allTaskEmpty.hidden =
         taskRecords.length !== 0;
 }
-
 
 function renderTaskTable(
     tableBody,
@@ -758,7 +698,6 @@ function renderTaskTable(
     });
 }
 
-
 /* =========================================================
    TABLE CELL
    ========================================================= */
@@ -771,15 +710,14 @@ function appendCell(row, value) {
 
     cell.textContent =
         value === null ||
-        value === undefined ||
-        value === ''
+            value === undefined ||
+            value === ''
             ? '—'
             : String(value);
 
 
     row.appendChild(cell);
 }
-
 
 /* =========================================================
    PRIORITY CELL
@@ -814,7 +752,6 @@ function appendPriorityCell(
 
     row.appendChild(cell);
 }
-
 
 /* =========================================================
    TASK ACTIONS
@@ -855,7 +792,6 @@ function appendTaskActions(
         () => startEditTask(task)
     );
 
-
     const deleteButton =
         document.createElement('button');
 
@@ -874,7 +810,6 @@ function appendTaskActions(
         () => deleteTask(task.id)
     );
 
-
     wrapper.appendChild(editButton);
 
     wrapper.appendChild(deleteButton);
@@ -883,7 +818,6 @@ function appendTaskActions(
 
     row.appendChild(cell);
 }
-
 
 /* =========================================================
    RENDER PROJECTS
@@ -1092,7 +1026,6 @@ function renderUsers() {
         state.users.length !== 0;
 }
 
-
 /* =========================================================
    PROJECT SELECTS
    ========================================================= */
@@ -1168,7 +1101,6 @@ function populateProjectSelects() {
 
     });
 }
-
 
 /* =========================================================
    IMPORTANT:
@@ -1551,7 +1483,7 @@ async function createTask(payload) {
         setMessage(
             dom.taskMessage,
             error.message ||
-                'Unable to create task.',
+            'Unable to create task.',
             'error'
         );
     }
@@ -1700,7 +1632,7 @@ async function updateTask(
         setMessage(
             dom.taskMessage,
             error.message ||
-                'Unable to update task.',
+            'Unable to update task.',
             'error'
         );
     }
@@ -1832,7 +1764,7 @@ async function deleteTask(taskId) {
 
         showToast(
             error.message ||
-                'Unable to delete task.',
+            'Unable to delete task.',
             'error'
         );
     }
@@ -1965,7 +1897,7 @@ async function searchTasks(
 
         showToast(
             error.message ||
-                'Unable to search tasks.',
+            'Unable to search tasks.',
             'error'
         );
     }
@@ -2023,7 +1955,7 @@ async function sortTasks(sort) {
 
         showToast(
             error.message ||
-                'Unable to sort tasks.',
+            'Unable to sort tasks.',
             'error'
         );
     }
@@ -2173,7 +2105,7 @@ async function handleQuickAdd(
         setMessage(
             messageElement,
             error.message ||
-                'Unable to create Quick Add task.',
+            'Unable to create Quick Add task.',
             'error'
         );
 
@@ -2750,7 +2682,7 @@ async function saveModal(event) {
         setMessage(
             dom.modalMessage,
             error.message ||
-                'Unable to save record.',
+            'Unable to save record.',
             'error'
         );
 
@@ -2763,9 +2695,9 @@ async function saveModal(event) {
 }
 
 
-/* =========================================================
-   DELETE PROJECT
-   ========================================================= */
+
+   //DELETE PROJECT
+   
 
 async function deleteProject(projectId) {
 
@@ -2800,7 +2732,6 @@ async function deleteProject(projectId) {
 
 
         await loadProjects();
-
         await loadTasks();
 
 
@@ -2820,7 +2751,7 @@ async function deleteProject(projectId) {
 
         showToast(
             error.message ||
-                'Unable to delete project.',
+            'Unable to delete project.',
             'error'
         );
     }
@@ -2884,7 +2815,7 @@ async function deleteUser(userId) {
 
         showToast(
             error.message ||
-                'Unable to delete user.',
+            'Unable to delete user.',
             'error'
         );
     }
