@@ -329,7 +329,6 @@ function showPage(pageId) {
         return;
     }
 
-
     page.classList.add('active');
 
     navButton.classList.add('active');
@@ -345,7 +344,6 @@ function showPage(pageId) {
 
     dom.sidebar.classList.remove('open');
 }
-
 
 /* =========================================================
    FOCUS TASK FORM
@@ -366,7 +364,6 @@ function focusTaskForm() {
         250
     );
 }
-
 
 /* =========================================================
    LOAD TASKS
@@ -553,7 +550,6 @@ async function loadUsers() {
     }
 }
 
-
 /* =========================================================
    CACHE
    ========================================================= */
@@ -596,7 +592,6 @@ function loadCachedTasks() {
     }
 }
 
-
 function saveCachedTasks() {
 
     try {
@@ -615,7 +610,6 @@ function saveCachedTasks() {
         );
     }
 }
-
 
 /* =========================================================
    RENDER TASKS
@@ -642,7 +636,6 @@ function renderTasks(taskRecords) {
     dom.allTaskEmpty.hidden =
         taskRecords.length !== 0;
 }
-
 
 function renderTaskTable(
     tableBody,
@@ -705,7 +698,6 @@ function renderTaskTable(
     });
 }
 
-
 /* =========================================================
    TABLE CELL
    ========================================================= */
@@ -726,7 +718,6 @@ function appendCell(row, value) {
 
     row.appendChild(cell);
 }
-
 
 /* =========================================================
    PRIORITY CELL
@@ -761,7 +752,6 @@ function appendPriorityCell(
 
     row.appendChild(cell);
 }
-
 
 /* =========================================================
    TASK ACTIONS
@@ -802,7 +792,6 @@ function appendTaskActions(
         () => startEditTask(task)
     );
 
-
     const deleteButton =
         document.createElement('button');
 
@@ -821,7 +810,6 @@ function appendTaskActions(
         () => deleteTask(task.id)
     );
 
-
     wrapper.appendChild(editButton);
 
     wrapper.appendChild(deleteButton);
@@ -830,7 +818,6 @@ function appendTaskActions(
 
     row.appendChild(cell);
 }
-
 
 /* =========================================================
    RENDER PROJECTS
@@ -1039,7 +1026,6 @@ function renderUsers() {
         state.users.length !== 0;
 }
 
-
 /* =========================================================
    PROJECT SELECTS
    ========================================================= */
@@ -1115,7 +1101,6 @@ function populateProjectSelects() {
 
     });
 }
-
 
 /* =========================================================
    IMPORTANT:
