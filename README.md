@@ -45,57 +45,62 @@ TaskFlow is a full-stack task and project management application built with Fast
 
 ```text
 TaskFlow/
-│
 ├── backend/
-│   │
-│   ├── app.py
-│   ├── database.py
-│   ├── requirements.txt
-│   ├── benchmark.py
-│   ├── check_algorithms.py
-│   │
+│   ├── ai/
+│   │   ├── __init__.py
+│   │   └── quick_add_parser.py
 │   ├── algorithms/
 │   │   ├── __init__.py
-│   │   ├── insertion_sort.py
 │   │   ├── binary_search.py
-│   │   ├── linear_search.py
+│   │   ├── comparison_algorithms.py
 │   │   ├── comparison_counter.py
-│   │   └── comparison_algorithms.py
-│   │
-│   ├── ai/
-│   │   └── quick_add_parser.py
-│   │
+│   │   ├── insertion_sort.py
+│   │   └── linear_search.py
+│   ├── middleware/
+│   │   ├── __init__.py
+│   │   └── request_logging.py
 │   ├── models/
-│   │   ├── user_model.py
+│   │   ├── __init__.py
 │   │   ├── project_model.py
-│   │   └── task_model.py
-│   │
-│   ├── schemas/
-│   │   ├── user_schema.py
-│   │   ├── project_schema.py
-│   │   └── task_schema.py
-│   │
+│   │   ├── task_model.py
+│   │   └── user_model.py
 │   ├── repositories/
-│   │   ├── user_repository.py
+│   │   ├── __init__.py
 │   │   ├── project_repository.py
-│   │   └── task_repository.py
-│   │
+│   │   ├── task_repository.py
+│   │   └── user_repository.py
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── project_router.py
+│   │   ├── task_router.py
+│   │   └── user_router.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── project_schema.py
+│   │   ├── task_schema.py
+│   │   └── user_schema.py
 │   ├── services/
-│   │   ├── user_service.py
+│   │   ├── __init__.py
 │   │   ├── project_service.py
-│   │   └── task_service.py
-│   │
-│   └── routers/
-│       ├── user_router.py
-│       ├── project_router.py
-│       └── task_router.py
-│
+│   │   ├── statistics_service.py
+│   │   ├── task_service.py
+│   │   └── user_service.py
+│   ├── app.py
+│   ├── benchmark.py
+│   ├── check_algorithms.py
+│   ├── config.py
+│   ├── database.py
+│   ├── dependencies.py
+│   ├── requirements.txt
+│   └── results.txt
 ├── frontend/
 │   ├── index.html
-│   ├── styles.css
-│   └── script.js
-│
-└── README.md
+│   ├── script.js
+│   └── styles.css
+├── .gitignore
+├── README.md
+└── requirements.txt
+
 ```
 
 ## Data Model
